@@ -3,7 +3,7 @@ import axios from 'axios'
 //****************************************************其实为了更好的可用性，封装这个第三方插件的时候，最好是连配置信息也封装起来，这样后期更换插件时更改的内容会少一些***************************************************
 //如果更换后的请求插件不支持Promise，则需要返回Promise，在里面处理插件对应的请求成功，请求失败
 
-export function request1(config) {
+export function request(config) {
     const instance = axios.create({
         baseURL: 'http://123.207.32.32:8000',
         timeout: 5000
