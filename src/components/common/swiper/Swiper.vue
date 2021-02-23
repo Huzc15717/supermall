@@ -55,7 +55,7 @@ export default {
 
       this.screenWidth = document.documentElement.offsetWidth;
 
-      console.log("mounted " + this.bannerLis.length); //第一次加载是0
+      //console.log("mounted " + this.bannerLis.length); //第一次加载是0
       banner.style.height = this.bannerLis[0].offsetHeight + "px";
 
       this.left = this.bannerLis.length - 1;

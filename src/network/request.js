@@ -21,12 +21,29 @@ export function request(config) {
         //console.log(err)
     })
     //返回拦截器
-    instance.interceptors.response.use(res=>{
+    instance.interceptors.response.use(res => {
         console.log(res)
         return res.data
-    },err=>{
+    }, err => {
         console.log(err)
     })
 
     return instance(config);//最精简的写法，可以直接在调用的地方后面接着写Then、catch，但是需要第三方组件支持Promise，这样就不需要再传入成功和失败的回调方法
+}
+
+export function requestByoto(config) {
+    const bwinstance = axios.create({
+        baseURL: 'http://o2o.yun8848.com/fly',
+        //baseURL: 'http://192.168.4.109:56357',
+        timeout: 5000
+    });
+
+    bwinstance.interceptors.response.use(res => {
+        console.log(res)
+        return res.data
+    }, err => {
+        console.log(err)
+    });
+    
+    return bwinstance(config);
 }
