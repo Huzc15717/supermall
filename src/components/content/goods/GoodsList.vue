@@ -3,6 +3,7 @@
     <div class="goods-item" v-for="(item, index) of goods" :key="index">
       <GoodsListItem :item="item" />
     </div>
+    <div v-if="goods.length===0">暂无商品</div>
   </div>
 </template>
 <script>

@@ -1,54 +1,19 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"><div slot="center">购物车</div></nav-bar>
-    <Swiper :bannerImgs="bannerImgs" />
-    <HomeRecommendView :recommends="recommends" />
-    <FeatureView />
-    <TabControl :titles="['流行', '新款', '精选']" class="home-control" />
-    <GoodsList :goods="goods" />
-    <div class="clear"></div>
-    <ul>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-      <li>1</li>
-    </ul>
+    <Scroll class="wrapper">
+      <div>
+        <Swiper :bannerImgs="bannerImgs" />
+        <HomeRecommendView :recommends="recommends" />
+        <FeatureView />
+        <TabControl
+          :titles="['流行', '新款', '精选']"
+          class="home-control"
+          @tabclick="tabclick"
+        />
+        <GoodsList :goods="goods" />
+      </div>
+    </Scroll>
   </div>
 </template>
 
@@ -59,6 +24,7 @@ import HomeRecommendView from "@/views/home/childComps/HomeRecommendView";
 import FeatureView from "@/views/home/childComps/FeatureView";
 import TabControl from "@/components/content/TabControl/TabControl";
 import GoodsList from "@/components/content/goods/GoodsList";
+import Scroll from "@/components/common/scroll/Scroll";
 
 import { getHomeMultidata, GetHomeGoodsListdata } from "@/network/home";
 
@@ -73,13 +39,14 @@ export default {
         token: "S9i8otRgRYynkogGKjznzkSBXOLYqrSciaD3PCPZJQFG8uK4zvRnYg==",
         version: "1",
         pageNo: 0,
-        onePageNum: 10,
+        onePageNum: 20,
         Params: {
           branch_jg: "0000",
           vip_id: -1,
         },
       },
       goods: [],
+      currentType: 0,
     };
   },
   components: {
@@ -89,12 +56,13 @@ export default {
     FeatureView,
     TabControl,
     GoodsList,
+    Scroll,
   },
   created() {
     // 1.请求多个数据
     this.getHomeMultidata();
     // 2.请求商品数据
-    this.GetHomeGoodsListdata(this.querygoodsparam);
+    this.GetHomeGoodsListdata(this.querygoodsparam, this.currentType);
   },
   methods: {
     getHomeMultidata() {
@@ -104,10 +72,31 @@ export default {
         this.recommends = res.data.recommend.list;
       });
     },
-    GetHomeGoodsListdata(querygoodsparam) {
+    GetHomeGoodsListdata(querygoodsparam, index) {
+      switch (index) {
+        case 0:
+          querygoodsparam.Params.pricesort = null;
+          querygoodsparam.Params.webcls_id = null;
+          break;
+        case 1:
+          querygoodsparam.Params.pricesort = 2;
+          querygoodsparam.Params.webcls_id = null;
+          break;
+        case 2:
+          querygoodsparam.Params.pricesort = null;
+          querygoodsparam.Params.webcls_id = 2;
+          break;
+        default:
+          break;
+      }
+      console.log(JSON.stringify(querygoodsparam));
       GetHomeGoodsListdata(querygoodsparam).then((res) => {
         this.goods = res.data;
       });
+    },
+    tabclick(index) {
+      this.currentType = index;
+      this.GetHomeGoodsListdata(this.querygoodsparam, this.currentType);
     },
   },
 };
@@ -115,7 +104,9 @@ export default {
 
 <style>
 #home {
-  padding-top: 44px;
+  /* padding-top: 44px; */
+  height: 100vh;
+  position: relative;
 }
 .home-nav {
   background: var(--color-tint);
@@ -131,7 +122,12 @@ export default {
   position: sticky;
   top: 44px;
 }
-.clear{
-  clear: left;
+.wrapper {
+  overflow: hidden;
+  position: absolute;
+  top: 44px;
+  bottom: 49px;
+  left: 0;
+  right: 0;
 }
 </style>
