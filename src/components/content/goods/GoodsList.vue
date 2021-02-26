@@ -25,6 +25,9 @@ export default {
   components: {
     GoodsListItem,
   },
+  mounted(){
+    
+  }
 };
 </script>
 <style scoped>

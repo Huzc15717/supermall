@@ -9,7 +9,9 @@
     <slot name="points"></slot> -->
     <ul>
       <li v-for="(item, id) in bannerImgs" :key="id">
-        <a :href="item.link"><img :src="item.image" alt="" /></a>
+        <a :href="item.link"
+          ><img :src="item.image" alt="" @load="imgload"
+        /></a>
       </li>
     </ul>
     <ol>
@@ -41,43 +43,36 @@ export default {
       bannerLis: [],
       pointLis: [],
       screenWidth: 0,
-      imgSrc: "~@/assets/img/swiper/",
+      imgisload: false,
     };
   },
   mounted() {
-    setTimeout(() => {//这个地方延时加载是为了保证v-for里面的数据生成了dom元素，正常项目中肯定不能这么做
-      let banner = document.querySelector(".banner");
-      let bannerUl = banner.querySelector("ul");
-      this.bannerLis = bannerUl.querySelectorAll("li");
-
-      let points = banner.querySelector("ol");
-      this.pointLis = points.querySelectorAll("li");
-
-      this.screenWidth = document.documentElement.offsetWidth;
-
-      //console.log("mounted " + this.bannerLis.length); //第一次加载是0
-      banner.style.height = this.bannerLis[0].offsetHeight + "px";
-
-      this.left = this.bannerLis.length - 1;
-      this.center = 0;
-      this.right = 1;
-
-      this.timer = null;
-
-      this.startX = 0;
-      this.startTime = null;
-      //banner.addEventListener("touchstart", touchstartHandler); // 滑动开始绑定的函数 touchstartHandler
-      //banner.addEventListener("touchmove", touchmoveHandler); // 持续滑动绑定的函数 touchmoveHandler
-      //banner.addEventListener("touchend", touchendHandeler); // 滑动结束绑定的函数 touchendHandeler
-
-      // 归位（多次使用，封装成函数）
-      this.setTransform();
-
-      // 调用定时器
-      this.timer = setInterval(this.showNext, 2000);
-
-      this.pointLis[0].classList.add("active");
-    }, 1000);
+    // setTimeout(() => {
+    //   //这个地方延时加载是为了保证v-for里面的数据生成了dom元素，正常项目中肯定不能这么做
+    //   let banner = document.querySelector(".banner");
+    //   let bannerUl = banner.querySelector("ul");
+    //   this.bannerLis = bannerUl.querySelectorAll("li");
+    //   let points = banner.querySelector("ol");
+    //   this.pointLis = points.querySelectorAll("li");
+    //   this.screenWidth = document.documentElement.offsetWidth;
+    //   //console.log("mounted " + this.bannerLis.length); //第一次加载是0
+    //   banner.style.height = this.bannerLis[0].offsetHeight + "px";
+    //   this.left = this.bannerLis.length - 1;
+    //   this.center = 0;
+    //   this.right = 1;
+    //   this.timer = null;
+    //   this.startX = 0;
+    //   this.startTime = null;
+    //   //banner.addEventListener("touchstart", touchstartHandler); // 滑动开始绑定的函数 touchstartHandler
+    //   //banner.addEventListener("touchmove", touchmoveHandler); // 持续滑动绑定的函数 touchmoveHandler
+    //   //banner.addEventListener("touchend", touchendHandeler); // 滑动结束绑定的函数 touchendHandeler
+    //   // 归位（多次使用，封装成函数）
+    //   this.setTransform();
+    //   // 调用定时器
+    //   this.timer = setInterval(this.showNext, 2000);
+    //   this.pointLis[0].classList.add("active");
+    //   this.imgload();
+    // }, 1000);
   },
   methods: {
     touchstartHandler(e) {
@@ -182,6 +177,46 @@ export default {
       this.setTransform();
 
       this.setPoint();
+    },
+    setbannerHeight() {
+      let banner = document.querySelector(".banner");
+      let bannerUl = banner.querySelector("ul");
+      this.bannerLis = bannerUl.querySelectorAll("li");
+
+      let points = banner.querySelector("ol");
+      this.pointLis = points.querySelectorAll("li");
+
+      this.screenWidth = document.documentElement.offsetWidth;
+
+      //console.log("mounted " + this.bannerLis.length); //第一次加载是0
+      banner.style.height = this.bannerLis[0].offsetHeight + "px";
+
+      this.left = this.bannerLis.length - 1;
+      this.center = 0;
+      this.right = 1;
+
+      this.timer = null;
+
+      this.startX = 0;
+      this.startTime = null;
+      //banner.addEventListener("touchstart", touchstartHandler); // 滑动开始绑定的函数 touchstartHandler
+      //banner.addEventListener("touchmove", touchmoveHandler); // 持续滑动绑定的函数 touchmoveHandler
+      //banner.addEventListener("touchend", touchendHandeler); // 滑动结束绑定的函数 touchendHandeler
+
+      // 归位（多次使用，封装成函数）
+      this.setTransform();
+
+      // 调用定时器
+      this.timer = setInterval(this.showNext, 2000);
+
+      this.pointLis[0].classList.add("active");
+    },
+    imgload() {
+      if (!this.imgisload) {
+        this.setbannerHeight();
+        this.$emit("swiperimgload");
+        this.imgisload = true;
+      }
     },
   },
 };

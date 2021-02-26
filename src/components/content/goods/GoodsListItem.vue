@@ -1,6 +1,6 @@
 <template>
   <div class="goodsitem">
-    <img :src="item.pic_url" alt="" />
+    <img :src="item.pic_url" alt="" @load="imgload" />
     <div class="item-desc">
       <p>{{ item.item_name }}</p>
       <span class="item-prc">￥{{ item.disp_prc }}</span>
@@ -31,6 +31,11 @@ export default {
           ? itemname
           : itemname.substring(0, 15) + "...";
       };
+    },
+  },
+  methods: {
+    imgload() {
+      this.$bus.$emit("imgloadrefresh");
     },
   },
 };

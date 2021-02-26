@@ -1,13 +1,13 @@
 <template>
-    <div>
-        购物车
-    </div>
+  <div id="car">
+  </div>
 </template>
 
 <script>
-    export default {
-        name: 'Car'
-    }
+export default {
+  name: "Car",
+};
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>
