@@ -163,7 +163,7 @@ export default {
   activated() {
     // console.log("设置keep-alive后，进入Home组件，Home组件处于活跃状态？");
     this.wrapper.scrollTo(0, this.saveY, 0);
-    this.wrapper.Refresh();
+    this.wrapper.Refresh(); //这个刷新不能少，不然跳转位置不一定正常
   },
   deactivated() {
     // console.log("设置keep-alive后，离开Home组件，Home组件处于不活跃状态？");

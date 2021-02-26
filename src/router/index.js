@@ -13,6 +13,7 @@ const Home = () => import('@/views/home/Home.vue')
 const Category = () => import('@/views/category/Category.vue')
 const ShopCar = () => import('@/views/shopcar/Car.vue')
 const Mine = () => import('@/views/mine/Mine.vue')
+const Detail = () => import('@/views/detail/Detail')
 
 export default new Router({
   routes: [
@@ -35,6 +36,10 @@ export default new Router({
     {
       path: '/mine',
       component: Mine
+    },
+    {
+      path: '/detail/:id',
+      component: Detail
     }
   ],
   mode:'history'
