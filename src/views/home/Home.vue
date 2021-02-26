@@ -70,6 +70,7 @@ export default {
       isShowBackTop: false,
       tabcontrolOffSetTop: 0,
       isfixedtabcontrol: false,
+      saveY: 0,
     };
   },
   components: {
@@ -155,6 +156,18 @@ export default {
       // this.wrapper.Refresh();
       finishPullUp();
     });
+  },
+  destroyed() {
+    // console.log("销毁home组件？只有不设置keep-alive,路由跳转时才是销毁");
+  },
+  activated() {
+    // console.log("设置keep-alive后，进入Home组件，Home组件处于活跃状态？");
+    this.wrapper.scrollTo(0, this.saveY, 0);
+    this.wrapper.Refresh();
+  },
+  deactivated() {
+    // console.log("设置keep-alive后，离开Home组件，Home组件处于不活跃状态？");
+    this.saveY = this.wrapper.getbsY();
   },
 };
 </script>

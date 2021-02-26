@@ -52,13 +52,16 @@ export default {
   },
   methods: {
     scrollTo(x, y, time = 500) {
-      this.bs && this.bs.scrollTo(x, y, time);//这个地方是先判断this.bs不为null，然后执行后面的方法
+      this.bs && this.bs.scrollTo(x, y, time); //这个地方是先判断this.bs不为null，然后执行后面的方法
     },
     finishpullup() {
       this.bs && this.bs.finishPullUp();
     },
     Refresh() {
       this.bs && this.bs.refresh();
+    },
+    getbsY() {
+      return this.bs ? this.bs.y : 0;
     },
   },
 };
