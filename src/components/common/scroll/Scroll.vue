@@ -35,19 +35,22 @@ export default {
         });
       }
 
-      this.bs.on("scroll", (position) => {
-        this.$emit("scroll", position);
-      });
+      if (this.probeType == 2 || this.probeType == 3) {
+        this.bs.on("scroll", (position) => {
+          this.$emit("scroll", position);
+        });
+      }
 
-      this.bs.on("pullingUp", () => {
-        this.$emit("pullupload");
-
-        // setTimeout(() => {
-        // 下面这两句结束上拉和刷新实际在项目中分不同区域做，结束finishPullUp在调用scroll组件的父组件中使用，刷新在实际加载绑定图片或内容的子组件中使用，感觉是刷新在前再结束
-        //   this.bs.finishPullUp();
-        //   this.bs.refresh();
-        // }, 2000);
-      });
+      if (this.pullUpLoad) {
+        this.bs.on("pullingUp", () => {
+          this.$emit("pullupload");
+          // setTimeout(() => {
+          // 下面这两句结束上拉和刷新实际在项目中分不同区域做，结束finishPullUp在调用scroll组件的父组件中使用，刷新在实际加载绑定图片或内容的子组件中使用，感觉是刷新在前再结束
+          //   this.bs.finishPullUp();
+          //   this.bs.refresh();
+          // }, 2000);
+        });
+      }
     });
   },
   methods: {

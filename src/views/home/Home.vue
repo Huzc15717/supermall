@@ -17,7 +17,7 @@
       @pullupload="pullupload"
     >
       <div class="content">
-        <Swiper :bannerImgs="bannerImgs" @swiperimgload="swiperimgload" />
+        <HomeSwiper :bannerImgs="bannerImgs" @swiperimgload="swiperimgload" />
         <HomeRecommendView :recommends="recommends" />
         <FeatureView />
         <TabControl
@@ -37,7 +37,7 @@
 <script>
 import Scroll from "@/components/common/scroll/Scroll";
 import NavBar from "@/components/common/navbar/NavBar.vue";
-import Swiper from "@/components/common/swiper/Swiper";
+import HomeSwiper from "@/views/home/childComps/HomeSwiper";
 import HomeRecommendView from "@/views/home/childComps/HomeRecommendView";
 import FeatureView from "@/views/home/childComps/FeatureView";
 import TabControl from "@/components/content/TabControl/TabControl";
@@ -76,7 +76,7 @@ export default {
   components: {
     Scroll,
     NavBar,
-    Swiper,
+    HomeSwiper,
     HomeRecommendView,
     FeatureView,
     TabControl,

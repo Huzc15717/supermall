@@ -1,270 +1,245 @@
 <template>
-  <div
-    class="banner"
-    @touchstart="touchstartHandler"
-    @touchmove="touchmoveHandler"
-    @touchend="touchendHandeler"
-  >
-    <!-- <slot name="imgs"></slot>
-    <slot name="points"></slot> -->
-    <ul>
-      <li v-for="(item, id) in bannerImgs" :key="id">
-        <a :href="item.link"
-          ><img :src="item.image" alt="" @load="imgload"
-        /></a>
-      </li>
-    </ul>
-    <ol>
-      <li v-for="(item, index) in bannerImgs.length" :key="index"></li>
-    </ol>
-  </div>
+    <div id="hy-swiper">
+      <div class="swiper" @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd">
+        <slot></slot>
+      </div>
+      <slot name="indicator">
+      </slot>
+      <div class="indicator">
+        <slot name="indicator" v-if="showIndicator && slideCount>1">
+          <div v-for="(item, index) in slideCount" class="indi-item" :class="{active: index === currentIndex-1}" :key="index"></div>
+        </slot>
+      </div>
+    </div>
 </template>
 
 <script>
-export default {
-  name: "Swiper",
-  props: {
-    bannerImgs: {
-      type: Array,
-      default() {
-        return [];
+	export default {
+		name: "Swiper",
+    props: {
+      interval: {
+		    type: Number,
+        default: 3000
       },
+      animDuration: {
+		    type: Number,
+        default: 300
+      },
+      moveRatio: {
+        type: Number,
+        default: 0.25
+      },
+      showIndicator: {
+        type: Boolean,
+        default: true
+      }
     },
-  },
-  data() {
-    return {
-      left: 0,
-      center: 0,
-      right: 1,
-      slideCount: 0,
-      startX: 0,
-      startTime: null,
-      timer: null,
-      bannerLis: [],
-      pointLis: [],
-      screenWidth: 0,
-      imgisload: false,
-    };
-  },
-  mounted() {
-    // setTimeout(() => {
-    //   //这个地方延时加载是为了保证v-for里面的数据生成了dom元素，正常项目中肯定不能这么做
-    //   let banner = document.querySelector(".banner");
-    //   let bannerUl = banner.querySelector("ul");
-    //   this.bannerLis = bannerUl.querySelectorAll("li");
-    //   let points = banner.querySelector("ol");
-    //   this.pointLis = points.querySelectorAll("li");
-    //   this.screenWidth = document.documentElement.offsetWidth;
-    //   //console.log("mounted " + this.bannerLis.length); //第一次加载是0
-    //   banner.style.height = this.bannerLis[0].offsetHeight + "px";
-    //   this.left = this.bannerLis.length - 1;
-    //   this.center = 0;
-    //   this.right = 1;
-    //   this.timer = null;
-    //   this.startX = 0;
-    //   this.startTime = null;
-    //   //banner.addEventListener("touchstart", touchstartHandler); // 滑动开始绑定的函数 touchstartHandler
-    //   //banner.addEventListener("touchmove", touchmoveHandler); // 持续滑动绑定的函数 touchmoveHandler
-    //   //banner.addEventListener("touchend", touchendHandeler); // 滑动结束绑定的函数 touchendHandeler
-    //   // 归位（多次使用，封装成函数）
-    //   this.setTransform();
-    //   // 调用定时器
-    //   this.timer = setInterval(this.showNext, 2000);
-    //   this.pointLis[0].classList.add("active");
-    //   this.imgload();
-    // }, 1000);
-  },
-  methods: {
-    touchstartHandler(e) {
-      clearInterval(this.timer);
-      this.startTime = Date.now();
-      this.startX = e.changedTouches[0].clientX;
+    data: function () {
+		  return {
+        slideCount: 0, // 元素个数
+        totalWidth: 0, // swiper的宽度
+        swiperStyle: {}, // swiper样式
+        currentIndex: 1, // 当前的index
+        scrolling: false, // 是否正在滚动
+      }
     },
-    touchmoveHandler(e) {
-      let dx = e.changedTouches[0].clientX - this.startX;
-      this.setTransition(0, 0, 0);
-      this.setTransform(dx);
+    mounted: function () {
+      // 1.操作DOM, 在前后添加Slide
+      setTimeout(() => {
+        this.handleDom();
+
+        // 2.开启定时器
+        this.startTimer();
+      }, 3000)
     },
-    touchendHandeler(e) {
-      // 在手指松开的时候，要判断当前是否滑动成功
-      let dx = e.changedTouches[0].clientX - this.startX;
-      // 获取时间差
-      let dTime = Date.now() - this.startTime;
-      // 滑动成功的依据是滑动的距离（绝对值）超过屏幕的三分之一 或者滑动的时间小于300毫秒同时滑动的距离大于30
-      if (
-        Math.abs(dx) > this.screenWidth / 3 ||
-        (dTime < 300 && Math.abs(dx) > 30)
-      ) {
-        // 滑动成功了
-        // 判断用户是往哪个方向滑
-        if (dx > 0) {
-          // 往右滑 看到上一张
-          this.showPrev();
-        } else {
-          // 往左滑 看到下一张
-          this.showNext();
+    methods: {
+		  /**
+       * 定时器操作
+       */
+      startTimer: function () {
+		    this.playTimer = window.setInterval(() => {
+		      this.currentIndex++;
+		      this.scrollContent(-this.currentIndex * this.totalWidth);
+        }, this.interval)
+      },
+      stopTimer: function () {
+        window.clearInterval(this.playTimer);
+      },
+
+      /**
+       * 滚动到正确的位置
+       */
+      scrollContent: function (currentPosition) {
+        // 0.设置正在滚动
+        this.scrolling = true;
+
+        // 1.开始滚动动画
+        this.swiperStyle.transition ='transform '+ this.animDuration + 'ms';
+        this.setTransform(currentPosition);
+
+        // 2.判断滚动到的位置
+        this.checkPosition();
+
+        // 4.滚动完成
+        this.scrolling = false
+      },
+
+      /**
+       * 校验正确的位置
+       */
+      checkPosition: function () {
+        window.setTimeout(() => {
+          // 1.校验正确的位置
+          this.swiperStyle.transition = '0ms';
+          if (this.currentIndex >= this.slideCount + 1) {
+            this.currentIndex = 1;
+            this.setTransform(-this.currentIndex * this.totalWidth);
+          } else if (this.currentIndex <= 0) {
+            this.currentIndex = this.slideCount;
+            this.setTransform(-this.currentIndex * this.totalWidth);
+          }
+
+          // 2.结束移动后的回调
+          this.$emit('transitionEnd', this.currentIndex-1);
+        }, this.animDuration)
+      },
+
+      /**
+       * 设置滚动的位置
+       */
+      setTransform: function (position) {
+        this.swiperStyle.transform = `translate3d(${position}px, 0, 0)`;
+        this.swiperStyle['-webkit-transform'] = `translate3d(${position}px), 0, 0`;
+        this.swiperStyle['-ms-transform'] = `translate3d(${position}px), 0, 0`;
+      },
+
+      /**
+       * 操作DOM, 在DOM前后添加Slide
+       */
+		  handleDom: function () {
+        // 1.获取要操作的元素
+        let swiperEl = document.querySelector('.swiper');
+        let slidesEls = swiperEl.getElementsByClassName('slide');
+
+        // 2.保存个数
+        this.slideCount = slidesEls.length;
+
+        // 3.如果大于1个, 那么在前后分别添加一个slide
+        if (this.slideCount > 1) {
+          let cloneFirst = slidesEls[0].cloneNode(true);
+          let cloneLast = slidesEls[this.slideCount - 1].cloneNode(true);
+          swiperEl.insertBefore(cloneLast, slidesEls[0]);
+          swiperEl.appendChild(cloneFirst);
+          this.totalWidth = swiperEl.offsetWidth;
+          this.swiperStyle = swiperEl.style;
         }
-      } else {
-        // 添加上过渡
-        this.setTransition(1, 1, 1);
-        // 滑动失败了
-        this.setTransform();
+
+        // 4.让swiper元素, 显示第一个(目前是显示前面添加的最后一个元素)
+        this.setTransform(-this.totalWidth);
+      },
+
+      /**
+       * 拖动事件的处理
+       */
+      touchStart: function (e) {
+        // 1.如果正在滚动, 不可以拖动
+        if (this.scrolling) return;
+
+        // 2.停止定时器
+        this.stopTimer();
+
+        // 3.保存开始滚动的位置
+        this.startX = e.touches[0].pageX;
+      },
+
+      touchMove: function (e) {
+        // 1.计算出用户拖动的距离
+        this.currentX = e.touches[0].pageX;
+        this.distance = this.currentX - this.startX;
+        let currentPosition = -this.currentIndex * this.totalWidth;
+        let moveDistance = this.distance + currentPosition;
+
+        // 2.设置当前的位置
+        this.setTransform(moveDistance);
+      },
+
+      touchEnd: function (e) {
+        // 1.获取移动的距离
+        let currentMove = Math.abs(this.distance);
+
+        // 2.判断最终的距离
+        if (this.distance === 0) {
+          return
+        } else if (this.distance > 0 && currentMove > this.totalWidth * this.moveRatio) { // 右边移动超过0.5
+          this.currentIndex--
+        } else if (this.distance < 0 && currentMove > this.totalWidth * this.moveRatio) { // 向左移动超过0.5
+          this.currentIndex++
+        }
+
+        // 3.移动到正确的位置
+        this.scrollContent(-this.currentIndex * this.totalWidth);
+
+        // 4.移动完成后重新开启定时器
+        this.startTimer();
+      },
+
+      /**
+       * 控制上一个, 下一个
+       */
+      previous: function () {
+        this.changeItem(-1);
+      },
+
+      next: function () {
+        this.changeItem(1);
+      },
+
+      changeItem: function (num) {
+        // 1.移除定时器
+        this.stopTimer();
+
+        // 2.修改index和位置
+        this.currentIndex += num;
+        this.scrollContent(-this.currentIndex * this.totalWidth);
+
+        // 3.添加定时器
+        this.startTimer();
       }
-
-      // 重新启动定时器
-      clearInterval(this.timer);
-      // 调用定时器
-      this.timer = setInterval(this.showNext, 2000);
-    },
-    setPoint() {
-      for (let i = 0; i < this.pointLis.length; i++) {
-        this.pointLis[i].classList.remove("active");
-      }
-      this.pointLis[this.center].classList.add("active");
-    },
-    setTransform(dx) {
-      dx = dx || 0;
-      this.bannerLis[this.left].style.transform =
-        "translateX(" + (-this.screenWidth + dx) + "px)";
-      this.bannerLis[this.center].style.transform = "translateX(" + dx + "px)";
-      this.bannerLis[this.right].style.transform =
-        "translateX(" + (this.screenWidth + dx) + "px)";
-    },
-    setTransition(a, b, c) {
-      if (a) {
-        this.bannerLis[this.left].style.transition = "transform 1s";
-      } else {
-        this.bannerLis[this.left].style.transition = "none";
-      }
-      if (b) {
-        this.bannerLis[this.center].style.transition = "transform 1s";
-      } else {
-        this.bannerLis[this.center].style.transition = "none";
-      }
-      if (c) {
-        this.bannerLis[this.right].style.transition = "transform 1s";
-      } else {
-        this.bannerLis[this.right].style.transition = "none";
-      }
-    },
-    showPrev() {
-      this.right = this.center;
-      this.center = this.left;
-      this.left--;
-      if (this.left < 0) {
-        this.left = this.bannerLis.length - 1;
-      }
-
-      //添加过渡（多次使用，封装成函数）
-      this.setTransition(0, 1, 1);
-      // 归位
-      this.setTransform();
-
-      this.setPoint();
-    },
-    showNext() {
-      // 轮转下标
-      this.left = this.center;
-      this.center = this.right;
-      this.right++;
-      //　极值判断
-      if (this.right > this.bannerLis.length - 1) {
-        this.right = 0;
-      }
-      //添加过渡（多次使用，封装成函数）
-      this.setTransition(1, 1, 0);
-      // 归位
-      this.setTransform();
-
-      this.setPoint();
-    },
-    setbannerHeight() {
-      let banner = document.querySelector(".banner");
-      let bannerUl = banner.querySelector("ul");
-      this.bannerLis = bannerUl.querySelectorAll("li");
-
-      let points = banner.querySelector("ol");
-      this.pointLis = points.querySelectorAll("li");
-
-      this.screenWidth = document.documentElement.offsetWidth;
-
-      //console.log("mounted " + this.bannerLis.length); //第一次加载是0
-      banner.style.height = this.bannerLis[0].offsetHeight + "px";
-
-      this.left = this.bannerLis.length - 1;
-      this.center = 0;
-      this.right = 1;
-
-      this.timer = null;
-
-      this.startX = 0;
-      this.startTime = null;
-      //banner.addEventListener("touchstart", touchstartHandler); // 滑动开始绑定的函数 touchstartHandler
-      //banner.addEventListener("touchmove", touchmoveHandler); // 持续滑动绑定的函数 touchmoveHandler
-      //banner.addEventListener("touchend", touchendHandeler); // 滑动结束绑定的函数 touchendHandeler
-
-      // 归位（多次使用，封装成函数）
-      this.setTransform();
-
-      // 调用定时器
-      this.timer = setInterval(this.showNext, 2000);
-
-      this.pointLis[0].classList.add("active");
-    },
-    imgload() {
-      if (!this.imgisload) {
-        this.setbannerHeight();
-        this.$emit("swiperimgload");
-        this.imgisload = true;
-      }
-    },
-  },
-};
+    }
+	}
 </script>
 
 <style scoped>
-* {
-  margin: 0;
-  padding: 0;
-}
+  #hy-swiper {
+    overflow: hidden;
+    position: relative;
+  }
 
-img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+  .swiper {
+    display: flex;
+  }
 
-li {
-  list-style-type: none;
-}
+  .indicator {
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    width: 100%;
+    bottom: 8px;
+  }
 
-.banner {
-  overflow: hidden;
-  position: relative;
-}
+  .indi-item {
+    box-sizing: border-box;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #fff;
+    line-height: 8px;
+    text-align: center;
+    font-size: 12px;
+    margin: 0 5px;
+  }
 
-.banner ul li {
-  position: absolute;
-  transform: translateX(300%);
-}
-
-.banner ol {
-  position: absolute;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  bottom: 10px;
-}
-
-.banner ol li {
-  width: 5px;
-  height: 5px;
-  border: 1px solid white;
-  border-radius: 50%;
-  margin: 0px 2px;
-}
-
-.banner ol li.active {
-  background-color: white;
-}
+  .indi-item.active {
+    background-color: rgba(212,62,46,1.0);
+  }
 </style>
