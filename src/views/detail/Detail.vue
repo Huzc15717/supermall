@@ -8,6 +8,7 @@
             <img :src="topimg.pic_url" alt="" />
           </swiper-item>
         </Swiper>
+        <DetailPrc :goodprc="goodsprc" />
       </div>
     </Scroll>
   </div>
@@ -16,8 +17,9 @@
 import DetailNavBar from "@/views/detail/childcomps/DetailNavBar";
 import Scroll from "@/components/common/scroll/Scroll";
 import { Swiper, SwiperItem } from "@/components/common/swiper";
+import DetailPrc from "@/views/detail/childcomps/DetailPrc";
 
-import { Getotodata } from "@/network/detail";
+import { Getotodata, GoodsPrc, itemdesc } from "@/network/detail";
 
 export default {
   name: "Detail",
@@ -37,6 +39,8 @@ export default {
         },
       },
       TopImgs: [],
+      goodsprc: {},
+      itemdesc: {},
     };
   },
   components: {
@@ -44,13 +48,14 @@ export default {
     Scroll,
     Swiper,
     SwiperItem,
+    DetailPrc,
   },
   created() {
-    console.log(this.$route.params.id);
     this.paramquery.Params.item_id = this.$route.params.id;
     Getotodata("/wxa/GetWxaItemDetail", "POST", this.paramquery).then((res) => {
-      // console.log(res);
       this.TopImgs = res.data.piclist;
+      this.goodsprc = new GoodsPrc(res.data);
+      this.itemdesc = new itemdesc(res.data);
     });
   },
 };
@@ -59,12 +64,14 @@ export default {
 #detail {
   height: 100vh;
   position: relative;
+  z-index: 9;
+  background-color: #fff;
 }
 .bscroll {
   position: absolute;
   overflow: hidden;
   top: 44px;
-  bottom: 49px;
+  bottom: 0;
   left: 0;
   right: 0;
 }
